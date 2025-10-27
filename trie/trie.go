@@ -25,9 +25,9 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/trie/trienode"
-	"github.com/ethereum/go-ethereum/triedb/database"
 	"go-eth1.16.5-evm/core/types"
+	"go-eth1.16.5-evm/trie/trienode"
+	"go-eth1.16.5-evm/triedb/database"
 	"golang.org/x/sync/errgroup"
 )
 

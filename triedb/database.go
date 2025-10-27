@@ -20,13 +20,13 @@ import (
 	"errors"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
-	"github.com/ethereum/go-ethereum/trie/trienode"
-	"github.com/ethereum/go-ethereum/triedb/database"
-	"github.com/ethereum/go-ethereum/triedb/hashdb"
-	"github.com/ethereum/go-ethereum/triedb/pathdb"
 	"go-eth1.16.5-evm/core/rawdb"
+	"go-eth1.16.5-evm/ethdb"
+	"go-eth1.16.5-evm/trie/trienode"
+	"go-eth1.16.5-evm/triedb/database"
+	"go-eth1.16.5-evm/triedb/hashdb"
+	"go-eth1.16.5-evm/triedb/pathdb"
 )
 
 // Config defines all necessary options for database.

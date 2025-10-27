@@ -20,9 +20,9 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie/trienode"
-	"github.com/ethereum/go-ethereum/triedb/database"
 	"go-eth1.16.5-evm/core/types"
+	"go-eth1.16.5-evm/trie/trienode"
+	"go-eth1.16.5-evm/triedb/database"
 )
 
 // preimageStore wraps the methods of a backing store for reading and writing

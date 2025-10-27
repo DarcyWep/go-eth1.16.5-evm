@@ -21,9 +21,13 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus/misc"
+	"github.com/ethereum/go-ethereum/consensus"
+	"github.com/ethereum/go-ethereum/consensus/beacon"
+	"github.com/ethereum/go-ethereum/consensus/clique"
+	"github.com/ethereum/go-ethereum/consensus/ethash"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/params"
+	"github.com/holiman/uint256"
 	"go-eth1.16.5-evm/core/state"
 	"go-eth1.16.5-evm/core/tracing"
 	"go-eth1.16.5-evm/core/types"
@@ -69,10 +73,6 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 		gp          = new(GasPool).AddGas(block.GasLimit())
 	)
 
-	// Mutate the block and state according to any hard-fork specs
-	if config.DAOForkSupport && config.DAOForkBlock != nil && config.DAOForkBlock.Cmp(block.Number()) == 0 {
-		misc.ApplyDAOHardFork(statedb)
-	}
 	var (
 		context vm.BlockContext
 		signer  = types.MakeSigner(config, header.Number, header.Time)
@@ -127,7 +127,7 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 	}
 
 	// Finalize the block, applying any consensus engine specific extras (e.g. block rewards)
-	p.chain.Engine().Finalize(p.chain, header, tracingStateDB, block.Body())
+	p.engineFinalize(p.chain, header, tracingStateDB, block.Body())
 
 	return &ProcessResult{
 		Receipts: receipts,
@@ -342,4 +342,73 @@ func onSystemCallStart(tracer *tracing.Hooks, ctx *tracing.VMContext) {
 	} else if tracer.OnSystemCallStart != nil {
 		tracer.OnSystemCallStart()
 	}
+}
+
+func (p *StateProcessor) engineFinalize(chain consensus.ChainHeaderReader, header *types.Header, state vm.StateDB, body *types.Body) {
+	engine := p.chain.Engine()
+
+	if _, ok := engine.(*ethash.Ethash); ok {
+		// 当前是 Ethash 共识
+		accumulateRewards(chain.Config(), state, header, body.Uncles)
+	} else if _, ok := engine.(*clique.Clique); ok {
+		// 当前是 Clique 共识， POA下没有区块奖励
+	} else if beaconEngine, ok := engine.(*beacon.Beacon); ok {
+		if !beaconEngine.IsPoSHeader(types.SwitchHeader2EthereumTypes(header)) {
+			if _, ok1 := beaconEngine.InnerEngine().(*ethash.Ethash); ok1 {
+				accumulateRewards(chain.Config(), state, header, body.Uncles)
+			} else if _, ok1 := beaconEngine.InnerEngine().(*clique.Clique); ok1 {
+				// POA下没有区块奖励
+			} else {
+				fmt.Printf("Unknown Beacon consensus engine type: %T\n", engine)
+			}
+			return
+		}
+
+		// Withdrawals processing.
+		for _, w := range body.Withdrawals {
+			// Convert amount from gwei to wei.
+			amount := new(uint256.Int).SetUint64(w.Amount)
+			amount = amount.Mul(amount, uint256.NewInt(params.GWei))
+			state.AddBalance(w.Address, amount, tracing.BalanceIncreaseWithdrawal)
+		}
+		// No block reward which is issued by consensus layer instead.
+
+	} else {
+		fmt.Printf("Unknown consensus engine type: %T\n", engine)
+	}
+}
+
+// accumulateRewards credits the coinbase of the given block with the mining
+// reward. The total reward consists of the static block reward and rewards for
+// included uncles. The coinbase of each uncle block is also rewarded.
+func accumulateRewards(config *params.ChainConfig, stateDB vm.StateDB, header *types.Header, uncles []*types.Header) {
+	// Select the correct block reward based on chain progression
+	var (
+		FrontierBlockReward       = uint256.NewInt(5e+18) // Block reward in wei for successfully mining a block
+		ByzantiumBlockReward      = uint256.NewInt(3e+18) // Block reward in wei for successfully mining a block upward from Byzantium
+		ConstantinopleBlockReward = uint256.NewInt(2e+18) // Block reward in wei for successfully mining a block upward from Constantinople
+	)
+	blockReward := FrontierBlockReward
+	if config.IsByzantium(header.Number) {
+		blockReward = ByzantiumBlockReward
+	}
+	if config.IsConstantinople(header.Number) {
+		blockReward = ConstantinopleBlockReward
+	}
+	// Accumulate the rewards for the miner and any included uncles
+	reward := new(uint256.Int).Set(blockReward)
+	r := new(uint256.Int)
+	hNum, _ := uint256.FromBig(header.Number)
+	for _, uncle := range uncles {
+		uNum, _ := uint256.FromBig(uncle.Number)
+		r.AddUint64(uNum, 8)
+		r.Sub(r, hNum)
+		r.Mul(r, blockReward)
+		r.Rsh(r, 3)
+		stateDB.AddBalance(uncle.Coinbase, r, tracing.BalanceIncreaseRewardMineUncle)
+
+		r.Rsh(blockReward, 5)
+		reward.Add(reward, r)
+	}
+	stateDB.AddBalance(header.Coinbase, reward, tracing.BalanceIncreaseRewardMineBlock)
 }

@@ -20,8 +20,8 @@ import (
 	"encoding/binary"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
+	"go-eth1.16.5-evm/ethdb"
 )
 
 // ReadSnapshotDisabled retrieves if the snapshot maintenance is disabled.

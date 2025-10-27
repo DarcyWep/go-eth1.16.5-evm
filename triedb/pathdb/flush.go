@@ -21,9 +21,9 @@ import (
 
 	"github.com/VictoriaMetrics/fastcache"
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/trie/trienode"
 	"go-eth1.16.5-evm/core/rawdb"
+	"go-eth1.16.5-evm/ethdb"
+	"go-eth1.16.5-evm/trie/trienode"
 )
 
 // nodeCacheKey constructs the unique key of clean cache. The assumption is held

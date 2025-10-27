@@ -21,7 +21,7 @@ import (
 	"path/filepath"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethdb"
+	"go-eth1.16.5-evm/ethdb"
 )
 
 type tableSize struct {

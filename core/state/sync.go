@@ -18,10 +18,10 @@ package state
 
 import (
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie"
 	"go-eth1.16.5-evm/core/types"
+	"go-eth1.16.5-evm/ethdb"
+	"go-eth1.16.5-evm/trie"
 )
 
 // NewStateSync creates a new state trie download scheduler.

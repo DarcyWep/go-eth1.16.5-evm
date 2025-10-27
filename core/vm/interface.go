@@ -18,13 +18,13 @@ package vm
 
 import (
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/stateless"
 	"github.com/ethereum/go-ethereum/params"
-	"github.com/ethereum/go-ethereum/trie/utils"
 	"github.com/holiman/uint256"
 	"go-eth1.16.5-evm/core/state"
-	"go-eth1.16.5-evm/core/stateless"
 	"go-eth1.16.5-evm/core/tracing"
 	"go-eth1.16.5-evm/core/types"
+	"go-eth1.16.5-evm/trie/utils"
 )
 
 // StateDB is an EVM database for full state querying.

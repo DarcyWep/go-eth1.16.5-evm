@@ -140,3 +140,15 @@ func Transfer(db vm.StateDB, sender, recipient common.Address, amount *uint256.I
 	db.SubBalance(sender, amount, tracing.BalanceChangeTransfer)
 	db.AddBalance(recipient, amount, tracing.BalanceChangeTransfer)
 }
+
+//func getHeader(db ethdb.Database, hash common.Hash, number uint64) *types.Header {
+//
+//	if reader, ok := db.(ethdb.Reader); ok {
+//		header := rawdb.ReadHeader(reader, hash, number)
+//	}
+//
+//	if header == nil {
+//		return nil
+//	}
+//	return header
+//}

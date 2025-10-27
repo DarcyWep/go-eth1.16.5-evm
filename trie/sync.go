@@ -26,11 +26,11 @@ import (
 	"github.com/ethereum/go-ethereum/common/hexutil"
 	"github.com/ethereum/go-ethereum/common/prque"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/metrics"
 	"go-eth1.16.5-evm/core/rawdb"
 	"go-eth1.16.5-evm/core/types"
+	"go-eth1.16.5-evm/ethdb"
 )
 
 // ErrNotRequested is returned by the trie sync when it's requested to process a

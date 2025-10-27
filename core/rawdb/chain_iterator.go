@@ -24,10 +24,10 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/prque"
-	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/rlp"
 	"go-eth1.16.5-evm/core/types"
+	"go-eth1.16.5-evm/ethdb"
 )
 
 // InitDatabaseFromFreezer reinitializes an empty database from a previous batch

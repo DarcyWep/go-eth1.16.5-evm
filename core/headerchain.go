@@ -20,22 +20,29 @@ import (
 	"errors"
 	"fmt"
 	"sync/atomic"
-	"time"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/lru"
 	"github.com/ethereum/go-ethereum/consensus"
+	"github.com/ethereum/go-ethereum/core/rawdb"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rlp"
-	"go-eth1.16.5-evm/core/rawdb"
-	"go-eth1.16.5-evm/core/types"
 )
 
 const (
 	headerCacheLimit = 512
 	numberCacheLimit = 2048
+)
+
+type WriteStatus byte
+
+const (
+	NonStatTy WriteStatus = iota
+	CanonStatTy
+	SideStatTy
 )
 
 // HeaderChain implements the basic block header chain logic. It is not usable
@@ -91,7 +98,6 @@ func NewHeaderChain(chainDb ethdb.Database, config *params.ChainConfig, engine c
 		}
 	}
 	hc.currentHeaderHash = hc.CurrentHeader().Hash()
-	headHeaderGauge.Update(hc.CurrentHeader().Number.Int64())
 	return hc, nil
 }
 
@@ -181,7 +187,6 @@ func (hc *HeaderChain) Reorg(headers []*types.Header) error {
 	// Last step update all in-memory head header markers
 	hc.currentHeaderHash = last.Hash()
 	hc.currentHeader.Store(types.CopyHeader(last))
-	headHeaderGauge.Update(last.Number.Int64())
 	return nil
 }
 
@@ -306,42 +311,6 @@ func (hc *HeaderChain) ValidateHeaderChain(chain []*types.Header) (int, error) {
 		}
 	}
 	return 0, nil
-}
-
-// InsertHeaderChain inserts the given headers and does the reorganisations.
-//
-// The validity of the headers is NOT CHECKED by this method, i.e. they need to be
-// validated by ValidateHeaderChain before calling InsertHeaderChain.
-//
-// This insert is all-or-nothing. If this returns an error, no headers were written,
-// otherwise they were all processed successfully.
-//
-// The returned 'write status' says if the inserted headers are part of the canonical chain
-// or a side chain.
-func (hc *HeaderChain) InsertHeaderChain(chain []*types.Header, start time.Time) (WriteStatus, error) {
-	if hc.procInterrupt() {
-		return 0, errors.New("aborted")
-	}
-	res, err := hc.writeHeadersAndSetHead(chain)
-	if err != nil {
-		return 0, err
-	}
-	// Report some public statistics so the user has a clue what's going on
-	context := []interface{}{
-		"count", res.imported,
-		"elapsed", common.PrettyDuration(time.Since(start)),
-	}
-	if last := res.lastHeader; last != nil {
-		context = append(context, "number", last.Number, "hash", res.lastHash)
-		if timestamp := time.Unix(int64(last.Time), 0); time.Since(timestamp) > time.Minute {
-			context = append(context, []interface{}{"age", common.PrettyAge(timestamp)}...)
-		}
-	}
-	if res.ignored > 0 {
-		context = append(context, []interface{}{"ignored", res.ignored}...)
-	}
-	log.Debug("Imported new block headers", context...)
-	return res.status, err
 }
 
 // GetAncestor retrieves the Nth ancestor of a given block. It assumes that either the given block or
@@ -483,7 +452,6 @@ func (hc *HeaderChain) CurrentHeader() *types.Header {
 func (hc *HeaderChain) SetCurrentHeader(head *types.Header) {
 	hc.currentHeader.Store(head)
 	hc.currentHeaderHash = head.Hash()
-	headHeaderGauge.Update(head.Number.Int64())
 }
 
 type (
@@ -569,7 +537,6 @@ func (hc *HeaderChain) setHead(headBlock uint64, headTime uint64, updateFn Updat
 		}
 		hc.currentHeader.Store(parent)
 		hc.currentHeaderHash = parentHash
-		headHeaderGauge.Update(parent.Number.Int64())
 
 		// If this is the first iteration, wipe any leftover data upwards too so
 		// we don't end up with dangling daps in the database

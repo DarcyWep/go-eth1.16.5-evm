@@ -23,13 +23,13 @@ import (
 	"fmt"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethdb"
-	"github.com/ethereum/go-ethereum/trie/trienode"
-	"github.com/ethereum/go-ethereum/trie/utils"
-	"github.com/ethereum/go-ethereum/triedb/database"
 	"github.com/ethereum/go-verkle"
 	"github.com/holiman/uint256"
 	"go-eth1.16.5-evm/core/types"
+	"go-eth1.16.5-evm/ethdb"
+	"go-eth1.16.5-evm/trie/trienode"
+	"go-eth1.16.5-evm/trie/utils"
+	"go-eth1.16.5-evm/triedb/database"
 )
 
 var (

@@ -20,8 +20,8 @@ import (
 	"maps"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/trie/trienode"
-	"github.com/ethereum/go-ethereum/triedb"
+	"go-eth1.16.5-evm/trie/trienode"
+	"go-eth1.16.5-evm/triedb"
 )
 
 // contractCode represents a contract code with associated metadata.

@@ -23,8 +23,8 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
+	"go-eth1.16.5-evm/ethdb"
 )
 
 // Prove constructs a merkle proof for key. The result contains all encoded nodes

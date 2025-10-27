@@ -21,9 +21,9 @@ import (
 	"encoding/gob"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
 	"go-eth1.16.5-evm/core/rawdb"
+	"go-eth1.16.5-evm/ethdb"
 )
 
 // TransitionState is a structure that holds the progress markers of the

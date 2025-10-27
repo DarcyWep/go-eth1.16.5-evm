@@ -18,8 +18,8 @@ package trie
 
 import (
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/triedb/database"
 	"go-eth1.16.5-evm/core/types"
+	"go-eth1.16.5-evm/triedb/database"
 )
 
 // Reader is a wrapper of the underlying database reader. It's not safe

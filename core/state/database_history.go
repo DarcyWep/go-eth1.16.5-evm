@@ -21,13 +21,13 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/lru"
-	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/rlp"
-	"github.com/ethereum/go-ethereum/trie/utils"
-	"github.com/ethereum/go-ethereum/triedb"
-	"github.com/ethereum/go-ethereum/triedb/pathdb"
 	"go-eth1.16.5-evm/core/state/snapshot"
 	"go-eth1.16.5-evm/core/types"
+	"go-eth1.16.5-evm/ethdb"
+	"go-eth1.16.5-evm/trie/utils"
+	"go-eth1.16.5-evm/triedb"
+	"go-eth1.16.5-evm/triedb/pathdb"
 )
 
 // historicReader wraps a historical state reader defined in path database,
