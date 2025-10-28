@@ -1,13 +1,66 @@
 package database
 
-//func NewStateCache(db ethdb.Database) state.Database {
-//	config := defaultStateDBConfig()
-//	return state.NewDatabaseWithConfig(db, &trie.Config{
-//		Cache:     config.Cache,
-//		Journal:   config.Journal,
-//		Preimages: config.Preimages,
-//	})
-//}
+import (
+	"fmt"
+	"math/big"
+	"path/filepath"
+
+	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core"
+	"go-eth1.16.5-evm/core/rawdb"
+	"go-eth1.16.5-evm/core/state"
+	"go-eth1.16.5-evm/ethdb/leveldb"
+	"go-eth1.16.5-evm/triedb"
+)
+
+type AllDBForState struct {
+	DiskDB            *leveldb.Database
+	TrieDB            *triedb.Database
+	BlockChainStateDB *state.CachingDB
+	StateDB           *state.StateDB
+	stateRoot         common.Hash
+}
+
+func NewAllDBForState(blockNumber *big.Int, stateRoot common.Hash, isVerkle, readonly bool) (*AllDBForState, error) {
+	diskPath := filepath.Join(defaultStateDBConfig.path, "snapshot_"+blockNumber.String())
+	// 打开/创建新的链数据库
+	levelDB, err := leveldb.New(diskPath, defaultStateDBConfig.cache, defaultStateDBConfig.handles, "state_snapshot", readonly)
+	if err != nil {
+		return nil, fmt.Errorf("open leveldb error: " + err.Error())
+	}
+
+	triedb := triedb.NewDatabase(rawdb.NewDatabase(levelDB), trieDBConfig(core.DefaultConfig(), isVerkle))
+
+	bcStateDB := state.NewDatabase(triedb, nil)
+	statedb, err := state.New(stateRoot, bcStateDB)
+	if err != nil {
+		return nil, fmt.Errorf("create state db: " + err.Error())
+	}
+	return &AllDBForState{
+		DiskDB:            levelDB,
+		TrieDB:            triedb,
+		BlockChainStateDB: bcStateDB,
+		StateDB:           statedb,
+		stateRoot:         stateRoot,
+	}, nil
+}
+
+func (a *AllDBForState) UpdateStateDB(stateRoot common.Hash) error {
+	if stateRoot == a.stateRoot {
+		return nil
+	}
+	statedb, err := state.New(stateRoot, a.BlockChainStateDB)
+	if err != nil {
+		return fmt.Errorf("create state db: " + err.Error())
+	}
+	a.StateDB = statedb
+	return nil
+}
+
+func (a *AllDBForState) Close() {
+	_ = a.TrieDB.Close()
+	_ = a.DiskDB.Close()
+}
 
 //func NewSnap(db ethdb.Database, stateCache state.Database, header *types.Header) *snapshot.Tree {
 //	var recover bool

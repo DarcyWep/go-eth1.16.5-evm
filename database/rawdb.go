@@ -5,14 +5,13 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
-	"go-eth1.16.5-evm/config"
 	"go-eth1.16.5-evm/core/rawdb"
 	"go-eth1.16.5-evm/core/types"
 	"go-eth1.16.5-evm/ethdb"
 	"go-eth1.16.5-evm/ethdb/pebble"
 )
 
-func OpenDatabaseWithFreezer(ethConfig *config.EthConfig) (ethdb.Database, error) {
+func OpenDatabaseWithFreezer() (ethdb.Database, error) {
 	db, err := pebble.New(defaultPebbleConfig.file, defaultPebbleConfig.cache, defaultPebbleConfig.handles, defaultPebbleConfig.namespace, defaultPebbleConfig.readonly)
 	if err != nil {
 		return nil, err
@@ -44,14 +43,15 @@ func GetBlockByNumber(db ethdb.Database, number *big.Int) (*types.Block, error) 
 	return block, err
 }
 
-func GetHeaderByNumber(db ethdb.Database, number uint64) (*types.Header, error) {
+func GetHeaderByNumber(db ethdb.Database, number *big.Int) (*types.Header, error) {
 	var (
 		header *types.Header = nil
 		err    error         = nil
 	)
-	hash := rawdb.ReadCanonicalHash(db, number) // 创建StateDB
+
+	hash := rawdb.ReadCanonicalHash(db, number.Uint64()) // 创建StateDB
 	if (hash != common.Hash{}) {
-		if h := rawdb.ReadHeader(db, hash, number); header != nil {
+		if h := rawdb.ReadHeader(db, hash, number.Uint64()); h != nil {
 			header = h
 		} else {
 			err = fmt.Errorf("create stateDB error! header is nil")

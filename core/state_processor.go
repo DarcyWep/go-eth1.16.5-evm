@@ -129,6 +129,10 @@ func (p *StateProcessor) Process(block *types.Block, statedb *state.StateDB, cfg
 	// Finalize the block, applying any consensus engine specific extras (e.g. block rewards)
 	p.engineFinalize(p.chain, header, tracingStateDB, block.Body())
 
+	root := statedb.IntermediateRoot(evm.ChainConfig().IsEIP158(blockNumber)).Bytes()
+	fmt.Println("blockNumber="+blockNumber.String()+"\t state root:", common.BytesToHash(root))
+	//0xefabb422298ad31ecc02d3859e78e30f04cbfabc584dd1069731e8aaf8400063
+	//0xefabb422298ad31ecc02d3859e78e30f04cbfabc584dd1069731e8aaf8400063
 	return &ProcessResult{
 		Receipts: receipts,
 		Requests: requests,
