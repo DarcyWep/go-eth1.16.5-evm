@@ -5,18 +5,17 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/beacon"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
 	"github.com/ethereum/go-ethereum/eth/gasprice"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/miner"
 	"github.com/ethereum/go-ethereum/params"
+	"go-eth1.16.5-evm/consensus"
+	"go-eth1.16.5-evm/consensus/beacon"
+	"go-eth1.16.5-evm/consensus/ethash"
 	"go-eth1.16.5-evm/core"
 	"go-eth1.16.5-evm/core/history"
 	"go-eth1.16.5-evm/core/txpool/blobpool"
 	"go-eth1.16.5-evm/core/txpool/legacypool"
-	"go-eth1.16.5-evm/ethdb"
 )
 
 type SyncMode uint32
@@ -38,9 +37,10 @@ var FullNodeGPO = gasprice.Config{
 
 // DefaultsEthConfig contains default settings for use on the Ethereum main net.
 var DefaultsEthConfig = EthConfig{
+	Genesis:            core.DefaultGenesisBlock(),
 	HistoryMode:        history.KeepAll,
 	SyncMode:           SnapSync,
-	NetworkId:          0, // enable auto configuration of networkID == chainID
+	NetworkId:          1, // enable auto configuration of networkID == chainID
 	TxLookupLimit:      2350000,
 	TransactionHistory: 2350000,
 	LogHistory:         2350000,
@@ -177,7 +177,7 @@ type EthConfig struct {
 // CreateConsensusEngine creates a consensus engine for the given chain config.
 // Clique is allowed for now to live standalone, but ethash is forbidden and can
 // only exist on already merged networks.
-func CreateConsensusEngine(config *params.ChainConfig, db ethdb.Database) (consensus.Engine, error) {
+func CreateConsensusEngine(config *params.ChainConfig) (consensus.Engine, error) {
 	if config.TerminalTotalDifficulty == nil {
 		log.Error("Geth only supports PoS networks. Please transition legacy networks using Geth v1.13.x.")
 		return nil, errors.New("'terminalTotalDifficulty' is not set in genesis block")

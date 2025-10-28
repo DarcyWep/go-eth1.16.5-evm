@@ -33,8 +33,6 @@ import (
 	"time"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus/misc/eip1559"
-	"github.com/ethereum/go-ethereum/consensus/misc/eip4844"
 	"github.com/ethereum/go-ethereum/crypto/kzg4844"
 	"github.com/ethereum/go-ethereum/event"
 	"github.com/ethereum/go-ethereum/log"
@@ -43,6 +41,8 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/holiman/billy"
 	"github.com/holiman/uint256"
+	"go-eth1.16.5-evm/consensus/misc/eip1559"
+	"go-eth1.16.5-evm/consensus/misc/eip4844"
 	"go-eth1.16.5-evm/core"
 	"go-eth1.16.5-evm/core/state"
 	"go-eth1.16.5-evm/core/txpool"
@@ -450,13 +450,12 @@ func (p *BlobPool) Init(gasTip uint64, head *types.Header, reserver txpool.Reser
 	for addr := range p.index {
 		p.recheck(addr, nil)
 	}
-	newHeader := types.SwitchHeader2EthereumTypes(head)
 	var (
-		basefee = uint256.MustFromBig(eip1559.CalcBaseFee(p.chain.Config(), newHeader))
+		basefee = uint256.MustFromBig(eip1559.CalcBaseFee(p.chain.Config(), head))
 		blobfee = uint256.NewInt(params.BlobTxMinBlobGasprice)
 	)
 	if head.ExcessBlobGas != nil {
-		blobfee = uint256.MustFromBig(eip4844.CalcBlobFee(p.chain.Config(), newHeader))
+		blobfee = uint256.MustFromBig(eip4844.CalcBlobFee(p.chain.Config(), head))
 	}
 	p.evict = newPriceHeap(basefee, blobfee, p.index)
 
@@ -873,14 +872,13 @@ func (p *BlobPool) Reset(oldHead, newHead *types.Header) {
 	if p.chain.Config().IsCancun(newHead.Number, newHead.Time) {
 		p.limbo.finalize(p.chain.CurrentFinalBlock())
 	}
-	newHeader := types.SwitchHeader2EthereumTypes(newHead)
 	// Reset the price heap for the new set of basefee/blobfee pairs
 	var (
-		basefee = uint256.MustFromBig(eip1559.CalcBaseFee(p.chain.Config(), newHeader))
+		basefee = uint256.MustFromBig(eip1559.CalcBaseFee(p.chain.Config(), newHead))
 		blobfee = uint256.MustFromBig(big.NewInt(params.BlobTxMinBlobGasprice))
 	)
 	if newHead.ExcessBlobGas != nil {
-		blobfee = uint256.MustFromBig(eip4844.CalcBlobFee(p.chain.Config(), newHeader))
+		blobfee = uint256.MustFromBig(eip4844.CalcBlobFee(p.chain.Config(), newHead))
 	}
 	p.evict.reinit(basefee, blobfee, false)
 
@@ -2186,9 +2184,8 @@ func (p *BlobPool) Clear() {
 	p.index = make(map[common.Address][]*blobTxMeta)
 	p.spent = make(map[common.Address]*uint256.Int)
 
-	newHeader := types.SwitchHeader2EthereumTypes(p.head.Load())
 	var (
-		basefee = uint256.MustFromBig(eip1559.CalcBaseFee(p.chain.Config(), newHeader))
+		basefee = uint256.MustFromBig(eip1559.CalcBaseFee(p.chain.Config(), p.head.Load()))
 		blobfee = uint256.NewInt(params.BlobTxMinBlobGasprice)
 	)
 	p.evict = newPriceHeap(basefee, blobfee, p.index)

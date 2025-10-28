@@ -20,9 +20,9 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/misc/eip4844"
 	"github.com/holiman/uint256"
+	"go-eth1.16.5-evm/consensus"
+	"go-eth1.16.5-evm/consensus/misc/eip4844"
 	"go-eth1.16.5-evm/core/tracing"
 	"go-eth1.16.5-evm/core/types"
 	"go-eth1.16.5-evm/core/vm"
@@ -45,11 +45,10 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 		blobBaseFee *big.Int
 		random      *common.Hash
 	)
-	ethereumHeader := types.SwitchHeader2EthereumTypes(header)
 
 	// If we don't have an explicit author (i.e. not mining), extract from the header
 	if author == nil {
-		beneficiary, _ = chain.Engine().Author(ethereumHeader) // Ignore error, we're past header validation
+		beneficiary, _ = chain.Engine().Author(header) // Ignore error, we're past header validation
 	} else {
 		beneficiary = *author
 	}
@@ -57,7 +56,7 @@ func NewEVMBlockContext(header *types.Header, chain ChainContext, author *common
 		baseFee = new(big.Int).Set(header.BaseFee)
 	}
 	if header.ExcessBlobGas != nil {
-		blobBaseFee = eip4844.CalcBlobFee(chain.Config(), ethereumHeader)
+		blobBaseFee = eip4844.CalcBlobFee(chain.Config(), header)
 	}
 	if header.Difficulty.Sign() == 0 {
 		random = &header.MixDigest

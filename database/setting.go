@@ -5,31 +5,12 @@ import (
 	"runtime"
 )
 
-var path string
-
-func init() {
-	if runtime.GOOS == "darwin" {
-		path = "/Volumes/ETH_DATA/ethereum/geth/chaindata"
-	} else {
-		path = "/data/ethereum/execution/geth/chaindata"
-	}
-
-}
-
 type pebbleConfig struct {
 	file      string
 	cache     int // MB
 	handles   int
 	namespace string
 	readonly  bool
-}
-
-var defaultPebbleConfig = &pebbleConfig{
-	file:      path,
-	cache:     21462, // 如果内存较小，请修改
-	handles:   524288,
-	namespace: "eth/db/chaindata/",
-	readonly:  true,
 }
 
 type rawConfig struct {
@@ -39,11 +20,32 @@ type rawConfig struct {
 	readOnly         bool
 }
 
-var defaultRawConfig = &rawConfig{
-	ancient:          filepath.Join(path, "ancient"),
-	era:              "",
-	metricsNamespace: "eth/db/chaindata/",
-	readOnly:         true,
+var path string
+var defaultPebbleConfig *pebbleConfig
+var defaultRawConfig *rawConfig
+
+func init() {
+	if runtime.GOOS == "darwin" {
+		path = "/Volumes/ETH_DATA/ethereum/geth/chaindata"
+	} else {
+		//path = "/data/ethereum/execution/geth/chaindata"
+		path = "/root/ethereum/execution/geth/chaindata"
+	}
+	defaultPebbleConfig = &pebbleConfig{
+		file:      path,
+		cache:     21462, // 如果内存较小，请修改
+		handles:   524288,
+		namespace: "eth/db/chaindata/",
+		readonly:  true,
+	}
+	
+	defaultRawConfig = &rawConfig{
+		ancient:          filepath.Join(path, "ancient"),
+		era:              "",
+		metricsNamespace: "eth/db/chaindata/",
+		readOnly:         true,
+	}
+
 }
 
 type StateDBConfig struct {

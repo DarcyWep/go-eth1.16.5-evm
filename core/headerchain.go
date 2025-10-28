@@ -17,19 +17,18 @@
 package core
 
 import (
-	"errors"
 	"fmt"
 	"sync/atomic"
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/lru"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/core/rawdb"
-	"github.com/ethereum/go-ethereum/core/types"
-	"github.com/ethereum/go-ethereum/ethdb"
 	"github.com/ethereum/go-ethereum/log"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/ethereum/go-ethereum/rlp"
+	"go-eth1.16.5-evm/consensus"
+	"go-eth1.16.5-evm/core/rawdb"
+	"go-eth1.16.5-evm/core/types"
+	"go-eth1.16.5-evm/ethdb"
 )
 
 const (
@@ -72,20 +71,18 @@ type HeaderChain struct {
 	headerCache *lru.Cache[common.Hash, *types.Header]
 	numberCache *lru.Cache[common.Hash, uint64] // most recent block numbers
 
-	procInterrupt func() bool
-	engine        consensus.Engine
+	engine consensus.Engine
 }
 
 // NewHeaderChain creates a new HeaderChain structure. ProcInterrupt points
 // to the parent's interrupt semaphore.
-func NewHeaderChain(chainDb ethdb.Database, config *params.ChainConfig, engine consensus.Engine, procInterrupt func() bool) (*HeaderChain, error) {
+func NewHeaderChain(chainDb ethdb.Database, config *params.ChainConfig, engine consensus.Engine) (*HeaderChain, error) {
 	hc := &HeaderChain{
-		config:        config,
-		chainDb:       chainDb,
-		headerCache:   lru.NewCache[common.Hash, *types.Header](headerCacheLimit),
-		numberCache:   lru.NewCache[common.Hash, uint64](numberCacheLimit),
-		procInterrupt: procInterrupt,
-		engine:        engine,
+		config:      config,
+		chainDb:     chainDb,
+		headerCache: lru.NewCache[common.Hash, *types.Header](headerCacheLimit),
+		numberCache: lru.NewCache[common.Hash, uint64](numberCacheLimit),
+		engine:      engine,
 	}
 	hc.genesisHeader = hc.GetHeaderByNumber(0)
 	if hc.genesisHeader == nil {
@@ -230,10 +227,10 @@ func (hc *HeaderChain) WriteHeaders(headers []*types.Header) (int, error) {
 		parentKnown = alreadyKnown
 	}
 	// Skip the slow disk write of all headers if interrupted.
-	if hc.procInterrupt() {
-		log.Debug("Premature abort during headers import")
-		return 0, errors.New("aborted")
-	}
+	//if hc.procInterrupt() {
+	//	log.Debug("Premature abort during headers import")
+	//	return 0, errors.New("aborted")
+	//}
 	// Commit to disk!
 	if err := batch.Write(); err != nil {
 		log.Crit("Failed to write headers", "error", err)
@@ -301,10 +298,10 @@ func (hc *HeaderChain) ValidateHeaderChain(chain []*types.Header) (int, error) {
 	// Iterate over the headers and ensure they all check out
 	for i := range chain {
 		// If the chain is terminating, stop processing blocks
-		if hc.procInterrupt() {
-			log.Debug("Premature abort during headers verification")
-			return 0, errors.New("aborted")
-		}
+		//if hc.procInterrupt() {
+		//	log.Debug("Premature abort during headers verification")
+		//	return 0, errors.New("aborted")
+		//}
 		// Otherwise wait for headers checks and ensure they pass
 		if err := <-results; err != nil {
 			return i, err

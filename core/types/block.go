@@ -30,7 +30,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/common/hexutil"
-	ethereumtypes "github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/ethereum/go-verkle"
 )
@@ -333,63 +332,63 @@ func CopyHeader(h *Header) *Header {
 	return &cpy
 }
 
-// SwitchHeader2EthereumTypes creates a deep copy of a block header.
-func SwitchHeader2EthereumTypes(h *Header) *ethereumtypes.Header {
-	cpy := &ethereumtypes.Header{
-		ParentHash:  h.ParentHash,
-		UncleHash:   h.UncleHash,
-		Coinbase:    h.Coinbase,
-		Root:        h.Root,
-		TxHash:      h.TxHash,
-		ReceiptHash: h.ReceiptHash,
-		GasLimit:    h.GasLimit,
-		GasUsed:     h.GasUsed,
-		Time:        h.Time,
-		MixDigest:   h.MixDigest,
-	}
-	if len(h.Bloom.Bytes()) > 0 {
-		cpy.Bloom.SetBytes(h.Bloom.Bytes())
-	}
-	if h.Difficulty != nil {
-		cpy.Difficulty = new(big.Int).Set(h.Difficulty)
-	}
-	if h.Number != nil {
-		cpy.Number = new(big.Int).Set(h.Number)
-	}
-
-	if len(h.Extra) > 0 {
-		cpy.Extra = make([]byte, len(h.Extra))
-		copy(cpy.Extra, h.Extra)
-	}
-
-	cpy.Nonce = ethereumtypes.EncodeNonce(h.Nonce.Uint64())
-	if h.BaseFee != nil {
-		cpy.BaseFee = new(big.Int).Set(h.BaseFee)
-	}
-
-	if h.WithdrawalsHash != nil {
-		cpy.WithdrawalsHash = new(common.Hash)
-		*cpy.WithdrawalsHash = *h.WithdrawalsHash
-	}
-	if h.BlobGasUsed != nil {
-		cpy.BlobGasUsed = new(uint64)
-		*cpy.BlobGasUsed = *h.BlobGasUsed
-	}
-	if h.ExcessBlobGas != nil {
-		cpy.ExcessBlobGas = new(uint64)
-		*cpy.ExcessBlobGas = *h.ExcessBlobGas
-	}
-	if h.ParentBeaconRoot != nil {
-		cpy.ParentBeaconRoot = new(common.Hash)
-		*cpy.ParentBeaconRoot = *h.ParentBeaconRoot
-	}
-	if h.RequestsHash != nil {
-		cpy.RequestsHash = new(common.Hash)
-		*cpy.RequestsHash = *h.RequestsHash
-	}
-
-	return cpy
-}
+//// SwitchHeader2EthereumTypes creates a deep copy of a block header.
+//func SwitchHeader2EthereumTypes(h *Header) *ethereumtypes.Header {
+//	cpy := &ethereumtypes.Header{
+//		ParentHash:  h.ParentHash,
+//		UncleHash:   h.UncleHash,
+//		Coinbase:    h.Coinbase,
+//		Root:        h.Root,
+//		TxHash:      h.TxHash,
+//		ReceiptHash: h.ReceiptHash,
+//		GasLimit:    h.GasLimit,
+//		GasUsed:     h.GasUsed,
+//		Time:        h.Time,
+//		MixDigest:   h.MixDigest,
+//	}
+//	if len(h.Bloom.Bytes()) > 0 {
+//		cpy.Bloom.SetBytes(h.Bloom.Bytes())
+//	}
+//	if h.Difficulty != nil {
+//		cpy.Difficulty = new(big.Int).Set(h.Difficulty)
+//	}
+//	if h.Number != nil {
+//		cpy.Number = new(big.Int).Set(h.Number)
+//	}
+//
+//	if len(h.Extra) > 0 {
+//		cpy.Extra = make([]byte, len(h.Extra))
+//		copy(cpy.Extra, h.Extra)
+//	}
+//
+//	cpy.Nonce = ethereumtypes.EncodeNonce(h.Nonce.Uint64())
+//	if h.BaseFee != nil {
+//		cpy.BaseFee = new(big.Int).Set(h.BaseFee)
+//	}
+//
+//	if h.WithdrawalsHash != nil {
+//		cpy.WithdrawalsHash = new(common.Hash)
+//		*cpy.WithdrawalsHash = *h.WithdrawalsHash
+//	}
+//	if h.BlobGasUsed != nil {
+//		cpy.BlobGasUsed = new(uint64)
+//		*cpy.BlobGasUsed = *h.BlobGasUsed
+//	}
+//	if h.ExcessBlobGas != nil {
+//		cpy.ExcessBlobGas = new(uint64)
+//		*cpy.ExcessBlobGas = *h.ExcessBlobGas
+//	}
+//	if h.ParentBeaconRoot != nil {
+//		cpy.ParentBeaconRoot = new(common.Hash)
+//		*cpy.ParentBeaconRoot = *h.ParentBeaconRoot
+//	}
+//	if h.RequestsHash != nil {
+//		cpy.RequestsHash = new(common.Hash)
+//		*cpy.RequestsHash = *h.RequestsHash
+//	}
+//
+//	return cpy
+//}
 
 // DecodeRLP decodes a block from RLP.
 func (b *Block) DecodeRLP(s *rlp.Stream) error {

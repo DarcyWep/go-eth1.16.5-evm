@@ -21,13 +21,13 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/common"
-	"github.com/ethereum/go-ethereum/consensus"
-	"github.com/ethereum/go-ethereum/consensus/beacon"
-	"github.com/ethereum/go-ethereum/consensus/clique"
-	"github.com/ethereum/go-ethereum/consensus/ethash"
 	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/ethereum/go-ethereum/params"
 	"github.com/holiman/uint256"
+	"go-eth1.16.5-evm/consensus"
+	"go-eth1.16.5-evm/consensus/beacon"
+	"go-eth1.16.5-evm/consensus/clique"
+	"go-eth1.16.5-evm/consensus/ethash"
 	"go-eth1.16.5-evm/core/state"
 	"go-eth1.16.5-evm/core/tracing"
 	"go-eth1.16.5-evm/core/types"
@@ -353,7 +353,7 @@ func (p *StateProcessor) engineFinalize(chain consensus.ChainHeaderReader, heade
 	} else if _, ok := engine.(*clique.Clique); ok {
 		// 当前是 Clique 共识， POA下没有区块奖励
 	} else if beaconEngine, ok := engine.(*beacon.Beacon); ok {
-		if !beaconEngine.IsPoSHeader(types.SwitchHeader2EthereumTypes(header)) {
+		if !beaconEngine.IsPoSHeader(header) {
 			if _, ok1 := beaconEngine.InnerEngine().(*ethash.Ethash); ok1 {
 				accumulateRewards(chain.Config(), state, header, body.Uncles)
 			} else if _, ok1 := beaconEngine.InnerEngine().(*clique.Clique); ok1 {
