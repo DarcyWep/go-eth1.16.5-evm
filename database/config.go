@@ -11,19 +11,19 @@ import (
 	"go-eth1.16.5-evm/triedb/pathdb"
 )
 
-type pebbleConfig struct {
-	file      string
-	cache     int // MB
-	handles   int
-	namespace string
-	readonly  bool
+type PebbleConfig struct {
+	File      string
+	Cache     int // MB
+	Handles   int
+	Namespace string
+	Readonly  bool
 }
 
-type rawConfig struct {
-	ancient          string // ancients directory
-	era              string // era files directory
-	metricsNamespace string // prefix added to freezer metric names
-	readOnly         bool
+type RawConfig struct {
+	Ancient          string // ancients directory
+	Era              string // era files directory
+	MetricsNamespace string // prefix added to freezer metric names
+	ReadOnly         bool
 }
 
 type stateDBConfig struct {
@@ -33,30 +33,30 @@ type stateDBConfig struct {
 }
 
 var path string
-var defaultPebbleConfig *pebbleConfig
-var defaultRawConfig *rawConfig
+var DefaultPebbleConfig *PebbleConfig
+var DefaultRawConfig *RawConfig
 var defaultStateDBConfig *stateDBConfig
 
 func init() {
 	if runtime.GOOS == "darwin" {
 		path = "/Volumes/ETH_DATA/ethereum/geth/chaindata"
 	} else {
-		//path = "/data/ethereum/execution/geth/chaindata"
-		path = "/root/ethereum/execution/geth/chaindata"
+		path = "/data/ethereum/execution/geth/chaindata"
+		//path = "/root/ethereum/execution/geth/chaindata"
 	}
-	defaultPebbleConfig = &pebbleConfig{
-		file:      path,
-		cache:     21462, // 如果内存较小，请修改
-		handles:   524288,
-		namespace: "eth/db/chaindata/",
-		readonly:  true,
+	DefaultPebbleConfig = &PebbleConfig{
+		File:      path,
+		Cache:     21462, // 如果内存较小，请修改
+		Handles:   524288,
+		Namespace: "eth/db/chaindata/",
+		Readonly:  true,
 	}
 
-	defaultRawConfig = &rawConfig{
-		ancient:          filepath.Join(path, "ancient"),
-		era:              "",
-		metricsNamespace: "eth/db/chaindata/",
-		readOnly:         true,
+	DefaultRawConfig = &RawConfig{
+		Ancient:          filepath.Join(path, "ancient"),
+		Era:              "",
+		MetricsNamespace: "eth/db/chaindata/",
+		ReadOnly:         true,
 	}
 
 	defaultStateDBConfig = &stateDBConfig{

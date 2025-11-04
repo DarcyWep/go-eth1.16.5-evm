@@ -175,7 +175,11 @@ func (batch *freezerTableBatch) appendItem(data []byte) error {
 	// Put index entry to buffer.
 	entry := indexEntry{filenum: batch.t.headId, offset: uint32(itemOffset + itemSize)}
 	batch.indexBuffer = entry.append(batch.indexBuffer)
-	batch.curItem++
+	if batch.curItem == 0 {
+		batch.curItem = 21000000
+	} else {
+		batch.curItem++
+	}
 
 	return batch.maybeCommit()
 }

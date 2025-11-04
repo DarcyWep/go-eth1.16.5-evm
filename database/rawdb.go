@@ -11,17 +11,17 @@ import (
 	"go-eth1.16.5-evm/ethdb/pebble"
 )
 
-func OpenDatabaseWithFreezer() (ethdb.Database, error) {
-	db, err := pebble.New(defaultPebbleConfig.file, defaultPebbleConfig.cache, defaultPebbleConfig.handles, defaultPebbleConfig.namespace, defaultPebbleConfig.readonly)
+func OpenDatabaseWithFreezer(pebbleConfig *PebbleConfig, rawConfig *RawConfig) (ethdb.Database, error) {
+	db, err := pebble.New(pebbleConfig.File, pebbleConfig.Cache, pebbleConfig.Handles, pebbleConfig.Namespace, pebbleConfig.Readonly)
 	if err != nil {
 		return nil, err
 	}
 
 	frdb, err := rawdb.Open(db, rawdb.OpenOptions{
-		Ancient:          defaultRawConfig.ancient,
-		Era:              defaultRawConfig.era,
-		MetricsNamespace: defaultRawConfig.metricsNamespace,
-		ReadOnly:         defaultRawConfig.readOnly,
+		Ancient:          rawConfig.Ancient,
+		Era:              rawConfig.Era,
+		MetricsNamespace: rawConfig.MetricsNamespace,
+		ReadOnly:         rawConfig.ReadOnly,
 	})
 	return frdb, err
 }

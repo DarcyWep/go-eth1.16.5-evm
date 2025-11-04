@@ -11,24 +11,24 @@ import (
 	"go-eth1.16.5-evm/ethdb"
 )
 
-// var (
-//
-//	rootBlockNumber   *big.Int = new(big.Int).SetInt64(21_000_000)
-//	startBlockNumber  *big.Int = new(big.Int).SetInt64(21_000_000)
-//	finishBlockNumber *big.Int = new(big.Int).SetInt64(21_000_000)
-//	addSpan *big.Int = new(big.Int).SetInt64(1)
-//
-// )
 var (
-	rootBlockNumber   *big.Int = new(big.Int).SetInt64(2380000)
-	startBlockNumber  *big.Int = new(big.Int).SetInt64(2380001)
-	finishBlockNumber *big.Int = new(big.Int).SetInt64(2380005)
+	rootBlockNumber   *big.Int = new(big.Int).SetInt64(21_000_000)
+	startBlockNumber  *big.Int = new(big.Int).SetInt64(21_000_001)
+	finishBlockNumber *big.Int = new(big.Int).SetInt64(21_000_005)
 	addSpan           *big.Int = new(big.Int).SetInt64(1)
 	parentStateRoot   common.Hash
 )
 
+//var (
+//	rootBlockNumber   *big.Int = new(big.Int).SetInt64(2380000)
+//	startBlockNumber  *big.Int = new(big.Int).SetInt64(2380001)
+//	finishBlockNumber *big.Int = new(big.Int).SetInt64(2380005)
+//	addSpan           *big.Int = new(big.Int).SetInt64(1)
+//	parentStateRoot   common.Hash
+//)
+
 func newProcessor() (*core.StateProcessor, ethdb.Database, error) {
-	frdb, err := database.OpenDatabaseWithFreezer()
+	frdb, err := database.OpenDatabaseWithFreezer(database.DefaultPebbleConfig, database.DefaultRawConfig)
 	if err != nil {
 		return nil, nil, fmt.Errorf("OpenDatabaseWithFreezer err:" + err.Error())
 	}
@@ -81,7 +81,8 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		}
-		fmt.Println("blockNumber="+blockNumber.String()+"\t state root:", root)
+		fmt.Println("blockNumber="+blockNumber.String()+"\t process state root:", block.Root())
+		fmt.Println("blockNumber="+blockNumber.String()+"\t block state root:", root)
 		parentStateRoot = root
 	}
 
