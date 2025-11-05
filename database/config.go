@@ -26,16 +26,16 @@ type RawConfig struct {
 	ReadOnly         bool
 }
 
-type stateDBConfig struct {
-	path    string
-	cache   int
-	handles int
+type StateDBConfig struct {
+	Path    string
+	Cache   int
+	Handles int
 }
 
 var path string
 var DefaultPebbleConfig *PebbleConfig
 var DefaultRawConfig *RawConfig
-var defaultStateDBConfig *stateDBConfig
+var DefaultStateDBConfig *StateDBConfig
 
 func init() {
 	if runtime.GOOS == "darwin" {
@@ -59,10 +59,10 @@ func init() {
 		ReadOnly:         true,
 	}
 
-	defaultStateDBConfig = &stateDBConfig{
-		path:    "/data/ethereum/state_snapshot",
-		cache:   32768,
-		handles: 32768,
+	DefaultStateDBConfig = &StateDBConfig{
+		Path:    "/data/ethereum/state_snapshot",
+		Cache:   32768,
+		Handles: 32768,
 	}
 
 }

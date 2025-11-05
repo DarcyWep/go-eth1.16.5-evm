@@ -21,10 +21,10 @@ type AllDBForState struct {
 	stateRoot         common.Hash
 }
 
-func NewAllDBForState(blockNumber *big.Int, stateRoot common.Hash, isVerkle, readonly bool) (*AllDBForState, error) {
-	diskPath := filepath.Join(defaultStateDBConfig.path, "snapshot_"+blockNumber.String())
+func NewAllDBForState(stateConfig *StateDBConfig, blockNumber *big.Int, stateRoot common.Hash, isVerkle, readonly bool) (*AllDBForState, error) {
+	diskPath := filepath.Join(stateConfig.Path, "snapshot_"+blockNumber.String())
 	// 打开/创建新的链数据库
-	levelDB, err := leveldb.New(diskPath, defaultStateDBConfig.cache, defaultStateDBConfig.handles, "state_snapshot", readonly)
+	levelDB, err := leveldb.New(diskPath, stateConfig.Cache, stateConfig.Handles, "state_snapshot", readonly)
 	if err != nil {
 		return nil, fmt.Errorf("open leveldb error: " + err.Error())
 	}
