@@ -5,7 +5,7 @@ import (
 	"math/big"
 
 	"github.com/ethereum/go-ethereum/rlp"
-	"go-eth1.16.5-evm/copychain/copychain_common"
+	"go-eth1.16.5-evm/copychain/copychain_config"
 	"go-eth1.16.5-evm/core/rawdb"
 	"go-eth1.16.5-evm/core/types"
 	"go-eth1.16.5-evm/database"
@@ -76,7 +76,7 @@ func CopyChain() {
 	fmt.Printf("finish copy block, number=%d\n", 0)
 
 	// 复制后续区块
-	for blockNumber := copychain_common.StartBlockNumber; blockNumber.Cmp(copychain_common.FinishBlockNumber) == -1; blockNumber = blockNumber.Add(blockNumber, copychain_common.AddSpan) {
+	for blockNumber := copychain_config.StartBlockNumber; blockNumber.Cmp(copychain_config.FinishBlockNumber) == -1; blockNumber = blockNumber.Add(blockNumber, copychain_config.AddSpan) {
 		block, _, err = readBlock(oldFrdb, blockNumber)
 		if err != nil {
 			fmt.Printf("readBlock err:" + err.Error())

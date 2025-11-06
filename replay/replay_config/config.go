@@ -1,4 +1,4 @@
-package replay_common
+package replay_config
 
 import (
 	"math/big"

@@ -1,4 +1,4 @@
-package copychain_common
+package copychain_config
 
 import "math/big"
 

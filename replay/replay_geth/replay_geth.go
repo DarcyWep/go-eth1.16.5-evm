@@ -7,7 +7,7 @@ import (
 	"go-eth1.16.5-evm/core"
 	"go-eth1.16.5-evm/database"
 	"go-eth1.16.5-evm/ethdb"
-	"go-eth1.16.5-evm/replay/replay_common"
+	"go-eth1.16.5-evm/replay/replay_config"
 )
 
 func newProcessor() (*core.StateProcessor, ethdb.Database, error) {
@@ -33,7 +33,7 @@ func ReplayGeth() {
 		return
 	}
 	defer frdb.Close()
-	blockPre, err := database.GetBlockByNumber(frdb, replay_common.RootBlockNumber)
+	blockPre, err := database.GetBlockByNumber(frdb, replay_config.RootBlockNumber)
 	if err != nil {
 		panic(err)
 		return
@@ -42,7 +42,7 @@ func ReplayGeth() {
 	alldbForState, err := database.NewAllDBForState(database.DefaultStateDBConfig, blockPre.Number(), blockPre.Root(), false, false)
 	defer alldbForState.Close()
 
-	for blockNumber := replay_common.StartBlockNumber; blockNumber.Cmp(replay_common.FinishBlockNumber) == -1; blockNumber = blockNumber.Add(blockNumber, replay_common.AddSpan) {
+	for blockNumber := replay_config.StartBlockNumber; blockNumber.Cmp(replay_config.FinishBlockNumber) == -1; blockNumber = blockNumber.Add(blockNumber, replay_config.AddSpan) {
 		err := alldbForState.UpdateStateDB(parentStateRoot)
 		if err != nil {
 			panic(err)
