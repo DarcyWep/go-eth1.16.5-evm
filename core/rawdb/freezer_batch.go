@@ -23,7 +23,6 @@ import (
 
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/golang/snappy"
-	"go-eth1.16.5-evm/copychain/copychain_common"
 )
 
 const (
@@ -176,11 +175,7 @@ func (batch *freezerTableBatch) appendItem(data []byte) error {
 	// Put index entry to buffer.
 	entry := indexEntry{filenum: batch.t.headId, offset: uint32(itemOffset + itemSize)}
 	batch.indexBuffer = entry.append(batch.indexBuffer)
-	if batch.curItem == 0 {
-		batch.curItem = copychain_common.StartBlockNumber.Uint64()
-	} else {
-		batch.curItem++
-	}
+	batch.curItem++
 
 	return batch.maybeCommit()
 }

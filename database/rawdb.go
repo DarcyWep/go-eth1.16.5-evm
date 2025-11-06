@@ -11,6 +11,16 @@ import (
 	"go-eth1.16.5-evm/ethdb/pebble"
 )
 
+// OpenDatabase is not ancient db
+func OpenDatabase(pebbleConfig *PebbleConfig) (ethdb.Database, error) {
+	db, err := pebble.New(pebbleConfig.File, pebbleConfig.Cache, pebbleConfig.Handles, pebbleConfig.Namespace, pebbleConfig.Readonly)
+	if err != nil {
+		return nil, err
+	}
+
+	return rawdb.NewDatabase(db), nil
+}
+
 func OpenDatabaseWithFreezer(pebbleConfig *PebbleConfig, rawConfig *RawConfig) (ethdb.Database, error) {
 	db, err := pebble.New(pebbleConfig.File, pebbleConfig.Cache, pebbleConfig.Handles, pebbleConfig.Namespace, pebbleConfig.Readonly)
 	if err != nil {
@@ -32,7 +42,9 @@ func GetBlockByNumber(db ethdb.Database, number *big.Int) (*types.Block, error) 
 		err   error
 	)
 	hash := rawdb.ReadCanonicalHash(db, number.Uint64()) // 获取区块hash
+
 	if (hash != common.Hash{}) {
+
 		block = rawdb.ReadBlock(db, hash, number.Uint64())
 		if block == nil {
 			err = fmt.Errorf("read block(" + number.String() + ") error! block is nil")

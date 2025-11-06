@@ -11,7 +11,7 @@ import (
 	"go-eth1.16.5-evm/replay/replay_common"
 )
 
-const chianDataPath = "/data/ethereum/state_snapshot/chaindata_2100/geth/chaindata"
+const chianDataPath = "/data/ethereum/state_snapshot/chaindata_2100/"
 
 var (
 	pebbleConfig = &database.PebbleConfig{
@@ -35,9 +35,9 @@ var (
 )
 
 func newProcessor() (*core.StateProcessor, ethdb.Database, error) {
-	frdb, err := database.OpenDatabaseWithFreezer(pebbleConfig, rawConfig)
+	frdb, err := database.OpenDatabase(pebbleConfig)
 	if err != nil {
-		return nil, nil, fmt.Errorf("OpenDatabaseWithFreezer err:" + err.Error())
+		return nil, nil, fmt.Errorf("OpenDatabase err:" + err.Error())
 	}
 	engine, err := config.CreateConsensusEngine(config.MainnetChainConfig)
 	if err != nil {
@@ -77,7 +77,6 @@ func ReplayCopy() {
 			panic(err)
 			return
 		}
-		fmt.Println(block.Number(), block.Transactions())
 		_, err = processor.Process(block, alldbForState.StateDB, config.DefaultVmConfig)
 		if err != nil {
 			fmt.Println(err)

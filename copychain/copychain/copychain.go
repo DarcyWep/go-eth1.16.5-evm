@@ -3,7 +3,6 @@ package copychain
 import (
 	"fmt"
 	"math/big"
-	"path/filepath"
 
 	"github.com/ethereum/go-ethereum/rlp"
 	"go-eth1.16.5-evm/copychain/copychain_common"
@@ -53,53 +52,42 @@ func CopyChain() {
 	}
 	defer oldFrdb.Close()
 	pebbleConfig := &database.PebbleConfig{
-		File:      "/data/ethereum/state_snapshot/chaindata_2100/geth/chaindata",
+		File:      "/data/ethereum/state_snapshot/chaindata_2100/",
 		Cache:     21462, // 如果内存较小，请修改
 		Handles:   524288,
 		Namespace: "eth/db/chaindata/",
 		Readonly:  false,
 	}
-	rawConfig := &database.RawConfig{
-		Ancient:          filepath.Join(pebbleConfig.File, "ancient"),
-		Era:              "",
-		MetricsNamespace: "eth/db/chaindata/",
-		ReadOnly:         false,
-	}
-	newFrdb, err := database.OpenDatabaseWithFreezer(pebbleConfig, rawConfig)
+	newFrdb, err := database.OpenDatabase(pebbleConfig)
 	if err != nil {
-		fmt.Printf("OpenDatabaseWithFreezer err:" + err.Error())
+		fmt.Printf("OpenDatabase err:" + err.Error())
 		return
 	}
 	defer newFrdb.Close()
-	var (
-		blocks   types.Blocks
-		receipts []rlp.RawValue
-	)
-	block, receipt, err := readBlock(oldFrdb, new(big.Int).SetInt64(0))
+
+	// 复制创世块
+	block, _, err := readBlock(oldFrdb, new(big.Int).SetInt64(0))
 	if err != nil {
 		fmt.Printf("wrtieBlock err:" + err.Error())
 		return
 	}
-	blocks = append(blocks, block)
-	receipts = append(receipts, receipt)
+	rawdb.WriteBlock(newFrdb, block)
+	rawdb.WriteCanonicalHash(newFrdb, block.Hash(), block.NumberU64())
+	fmt.Printf("finish copy block, number=%d\n", 0)
 
+	// 复制后续区块
 	for blockNumber := copychain_common.StartBlockNumber; blockNumber.Cmp(copychain_common.FinishBlockNumber) == -1; blockNumber = blockNumber.Add(blockNumber, copychain_common.AddSpan) {
-		block, receipt, err = readBlock(oldFrdb, blockNumber)
+		block, _, err = readBlock(oldFrdb, blockNumber)
 		if err != nil {
-			fmt.Printf("wrtieBlock err:" + err.Error())
+			fmt.Printf("readBlock err:" + err.Error())
 			return
 		}
-		blocks = append(blocks, block)
-		receipts = append(receipts, receipt)
+		rawdb.WriteBlock(newFrdb, block)
+		rawdb.WriteCanonicalHash(newFrdb, block.Hash(), block.NumberU64())
+
+		// 每10万个区块写入一次
 		if blockNumber.Uint64()%100000 == 0 {
-			size, err := writeBlocks(newFrdb, blocks, receipts)
-			if err != nil {
-				fmt.Printf("writeBlocks err:" + err.Error())
-				return
-			}
-			fmt.Printf("finish copy block, number=%d, size=%fMB\n", blockNumber.Uint64(), size)
-			blocks = blocks[:0]
-			receipts = receipts[:0]
+			fmt.Printf("finish copy block, number=%d\n", blockNumber.Uint64())
 		}
 	}
 }
